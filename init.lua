@@ -91,7 +91,8 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+-- rhs
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -102,7 +103,7 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -165,9 +166,24 @@ vim.o.scrolloff = 10
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
 vim.o.confirm = true
+--
+-- rhs: start add
+vim.opt.autoindent = true
+vim.opt.smartindent = true
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.expandtab = true
+
+vim.opt.termguicolors = true
+-- rhs: start end
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+
+-- rhs: start add
+vim.keymap.set('n', '<leader>e', ':Neotree toggle<CR>', { desc = 'Toggle Explorer' })
+-- rhs: start end
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
@@ -683,6 +699,8 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         --
+        -- rhs
+        ts_ls = {},
 
         lua_ls = {
           -- cmd = { ... },
@@ -698,6 +716,9 @@ require('lazy').setup({
             },
           },
         },
+        --rhs
+        html = {},
+        cssls = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -716,6 +737,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'prettierd', -- JS/TS formatter (fast)
+        'ts_ls',    -- JS/TS Language Server
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -752,7 +775,8 @@ require('lazy').setup({
     },
     opts = {
       notify_on_error = false,
-      format_on_save = function(bufnr)
+      -- rhs: disabled format on save by adding 'x' to function assignment name
+      xformat_on_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
@@ -772,7 +796,8 @@ require('lazy').setup({
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        -- rhs
+        javascript = { "prettierd", "prettier", stop_after_first = true },
       },
     },
   },
@@ -875,7 +900,6 @@ require('lazy').setup({
       signature = { enabled = true },
     },
   },
-
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
@@ -895,6 +919,22 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
+    end,
+  },
+  -- rhs
+  -- Search for 'tokyonight' and replace that table with this:
+  --[[
+  --]]
+  {
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000, -- Make sure to load this before all the other start plugins
+    init = function()
+      -- Set the flavor here: latte, frappe, macchiato, mocha
+      vim.g.catppuccin_flavour = "latte"
+      vim.cmd.colorscheme 'catppuccin'
+      -- Optional: You can configure highlights here
+      vim.cmd.hi 'Comment gui=none'
     end,
   },
 
@@ -941,10 +981,12 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    -- rhs main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    main = 'nvim-treesitter.config', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      -- rhs ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'css', 'javascript', 'typescript' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -977,8 +1019,9 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  -- rhs
+  require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -1014,3 +1057,16 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+      -- rhs
+      --vim.cmd.colorscheme 'tokyonight-night'
+      --vim.cmd.colorscheme 'catppuccin'
+      --vim.cmd.colorscheme 'elflord'
+      --vim.cmd.colorscheme 'murphy'
+      --vim.cmd.colorscheme 'lunaperche'
+      --vim.cmd.colorscheme 'industry'
+      --vim.cmd.colorscheme 'morning'
+      --vim.cmd.colorscheme 'zellner'
+      --vim.cmd.colorscheme 'vim'
+      --vim.cmd.colorscheme 'slate'
+      --vim.cmd.colorscheme 'retrobox'
+      vim.cmd.colorscheme 'koehler'
